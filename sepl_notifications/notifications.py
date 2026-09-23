@@ -38,7 +38,6 @@ def get_delivery_date(sales_order_doc):
 
 
 def load_role_map():
-	roles = frappe.get_all("Item Notification Role", fields=["name", "item_fieldname"])
 	all_recip_rows = frappe.get_all(
 		"Item Notification Recipient",
 		filters={"parenttype": "Item Notification Role"},
@@ -47,13 +46,16 @@ def load_role_map():
 	role_to_employees = {}
 	for rr in all_recip_rows:
 		role_to_employees.setdefault(rr.parent, []).append(rr.employee)
-	role_map = {}
-	for r in roles:
-		role_map[r.item_fieldname] = {
-			"label": r.name,
-			"employees": role_to_employees.get(r.name, []),
-		}
-	return role_map
+	return role_to_employees
+
+
+def get_item_roles(item_code):
+	rows = frappe.get_all(
+		"Item Notify Role",
+		filters={"parenttype": "Item", "parent": item_code},
+		fields=["role"],
+	)
+	return [r.role for r in rows]
 
 
 def build_email(banner_title, banner_color, detail_rows, items, so_name, url):
@@ -118,20 +120,16 @@ def notify(so, event_type):
 		delivery_date = get_delivery_date(so)
 		action_date = formatdate(today(), "dd/mm/yyyy")
 
-		role_map = load_role_map()
-		item_fieldnames = list(role_map.keys())
+		role_to_employees = load_role_map()
 
 		recipients = {}
 		for row in so.items:
-			item_flags = frappe.db.get_value("Item", row.item_code, item_fieldnames, as_dict=True)
-			if not item_flags:
-				continue
-			matched_roles = [fn for fn in item_fieldnames if item_flags.get(fn)]
+			matched_roles = get_item_roles(row.item_code)
 			if not matched_roles:
 				continue
 			emp_ids = set()
-			for fn in matched_roles:
-				emp_ids.update(role_map[fn]["employees"])
+			for role_name in matched_roles:
+				emp_ids.update(role_to_employees.get(role_name, []))
 			for emp_id in emp_ids:
 				emp = frappe.db.get_value("Employee", emp_id, ["employee_name", "user_id"], as_dict=True)
 				if not emp or not emp.user_id:
