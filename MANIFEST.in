@@ -1,0 +1,17 @@
+include MANIFEST.in
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include sepl_notifications *.css
+recursive-include sepl_notifications *.csv
+recursive-include sepl_notifications *.html
+recursive-include sepl_notifications *.ico
+recursive-include sepl_notifications *.js
+recursive-include sepl_notifications *.json
+recursive-include sepl_notifications *.md
+recursive-include sepl_notifications *.png
+recursive-include sepl_notifications *.py
+recursive-include sepl_notifications *.svg
+recursive-include sepl_notifications *.txt
+recursive-exclude sepl_notifications *.pyc
