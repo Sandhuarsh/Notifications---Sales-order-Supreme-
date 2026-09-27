@@ -5,7 +5,7 @@ from frappe.utils import formatdate, get_url, today
 # TEST MODE: while True, every email is redirected to TEST_EMAIL_OVERRIDE
 # instead of the real employee addresses. Set to False to go live.
 # ---------------------------------------------------------------------------
-TEST_MODE = True
+TEST_MODE = False
 TEST_EMAIL_OVERRIDE = "sandhuarshpreet123@gmail.com"
 
 BANNER_COLOR_CREATED = "#16a34a"  # green
